@@ -1,1 +1,6 @@
-Hello backend
+1. Create a Folder named Spotyfy-Backend and npm init.
+2. install Express in our project using npm i express.
+3. We create a User Model, In which We create a database structure.
+4. Install Moongoose to connect nodejs server to Mongodb using npm i Moongoose
+
+
