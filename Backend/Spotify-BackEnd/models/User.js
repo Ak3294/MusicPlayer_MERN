@@ -1,27 +1,28 @@
 const mongoose = require('mongoose');
 
-// How to Create a Model
-//1. install mongoose
-//2. Create a mongoose schema(structure of the user)
-
-const user = new mongoose.Schema({
-    firstname:{
-        type:String,
-        require:true,
-    },
-    lastname:{
-        type:String,
-        require:false,
-    },
-    email:{
-        type:String,
-        require:true,
-    },
-    username:{
-        type:String,
-        require:true,
-    },
+const userSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: false,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true, // Ensure email is unique
+  },
+  userName: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
 });
 
-const UserModel = mongoose.model("User",User);
+const UserModel = mongoose.model("User", userSchema);
 module.exports = UserModel;

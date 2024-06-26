@@ -1,9 +1,16 @@
-const jwt = require('jwt');
-exports = {}
-exports.getToken=()=>{
-    const token = jwt.sign({identifier:user._id});
-    return token;
+const jwt = require("jsonwebtoken");
 
-}
-
-module.exports = exports
+exports.getToken = (user) => {
+  const token = jwt.sign(
+    {
+      identifier: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      userName: user.userName,
+    },
+    "secret", // Replace "secret" with your actual secret key
+    { expiresIn: '1h' } // Optional: token expiration
+  );
+  return token;
+};

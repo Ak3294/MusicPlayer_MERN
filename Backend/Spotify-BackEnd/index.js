@@ -1,61 +1,62 @@
 const express = require("express");
 require("dotenv").config();
-var JwtStrategy = require("passport-jwt").Strategy,
-  ExtractJwt = require("passport-jwt").ExtractJwt;
-const User = require("./models/User");
 const passport = require("passport");
+const mongoose = require("mongoose");
 const app = express();
 const port = 8080;
+const authRouter = require("./routes/auth");
+const songRoutes = require('./routes/song');
+const playlistRoutes = require('./routes/playlist');
 
-//Connect Mongodb to out node app
-const mongoose = require("mongoose");
 
-//mongoose.connect() takes two arguments : 1. which db to connect(DB url)
-//options for connections
+app.use(express.json());
+app.use(passport.initialize());
+
+// Connect to MongoDB
 mongoose
   .connect(
-    "mongodb+srv://music_player:" +
-      process.env.MONGO_PASSWORD +
-      "@cluster0.wvy58v4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    `mongodb+srv://music_player:${process.env.MONGO_PASSWORD}@cluster0.wvy58v4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
-  .then((x) => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.log("Error connecting to MongoDB", err);
-  });
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.log("Error connecting to MongoDB", err));
 
-//Setup Passport jwt
+// Setup Passport JWT
+const JwtStrategy = require("passport-jwt").Strategy;
+const ExtractJwt = require("passport-jwt").ExtractJwt;
+const User = require("./models/User");
 
 let opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = "secret";
+
 passport.use(
-  new JwtStrategy(opts, function (jwt_payload, done) {
-    User.findOne({ id: jwt_payload.sub }, function (err, user) {
-      // done(error, doesthe user exists)
-      if (err) {
-        return done(err, false);
-      }
+  new JwtStrategy(opts, async (jwt_payload, done) => {
+    try {
+      const user = await User.findById(jwt_payload.identifier);
       if (user) {
         return done(null, user);
       } else {
         return done(null, false);
-        // or you could create a new account
       }
-    });
+    } catch (err) {
+      return done(err, false);
+    }
   })
 );
 
-// try to make an get type api
+// Routes
+app.use("/auth", authRouter);
+app.use('/song',songRoutes)
+app.use('/playlist',playlistRoutes)
+
 app.get("/", (req, res) => {
-  //req contains all data for the request
-  //res contains all data for the response
   res.send("Hello World!");
 });
 
-// Run on Server on Port 8000
+
+
+// Start server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
